@@ -2,22 +2,26 @@
 declare(strict_types=1);
 
 
+use Hyperf\Guzzle\ClientFactory;
+use Hyperf\Utils\ApplicationContext;
+
 if (!function_exists("http_client")) {
     function http_client($url, $method='GET', $options=[])
     {
         try {
-            $client = new \GuzzleHttp\Client();
+            $clientFactory = new ClientFactory(ApplicationContext::getContainer());
+            $client = $clientFactory->create();
 
             if (!isset($options['timeout'])) {
                 $options['timeout'] = 30;
             }
 
-            $url = 'http://'. config('bb_ip'). ':'. config('bb_port'). $url;
-
             $res = $client->request($method, $url, $options);
 
             $res = json_decode($res->getBody()->getContents(), true);
+
         } catch (\Exception $e) {
+            \App\Log::error($url);
             log_standard_error($e);
             return resp(400, 'http请求失败');
         }

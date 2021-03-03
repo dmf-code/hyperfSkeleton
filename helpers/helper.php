@@ -41,6 +41,20 @@ if (!function_exists("resp")) {
     }
 }
 
+if (!function_exists("request")) {
+    function request()
+    {
+        return ApplicationContext::getContainer()->get(\Hyperf\HttpServer\Contract\RequestInterface::class);
+    }
+}
+
+if (!function_exists("response")) {
+    function response()
+    {
+        return ApplicationContext::getContainer()->get(\Hyperf\HttpServer\Contract\ResponseInterface::class);
+    }
+}
+
 if (!function_exists("log_standard_error")) {
     function log_standard_error(\Exception $e) {
         $str = sprintf("File: %s, Line %s, %s", $e->getFile(), $e->getLine(), $e->getMessage());

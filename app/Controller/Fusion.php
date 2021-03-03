@@ -6,10 +6,19 @@ namespace App\Controller;
 
 use Carbon\Carbon;
 use Hyperf\Contract\LengthAwarePaginatorInterface;
+use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\Paginator\LengthAwarePaginator;
+use Hyperf\Paginator\Paginator;
+use Hyperf\Utils\ApplicationContext;
 
 
-trait ApiResponse
+trait Fusion
 {
+
+    public function inputs($params): array
+    {
+        return array_combine($params, $this->request->inputs($params));
+    }
 
     protected function success($msg="ok", $data = [], $code=200): array
     {
@@ -32,7 +41,32 @@ trait ApiResponse
         ];
     }
 
-    public function validator($rules, $message = []): ?string
+    protected function customPaginator($list,$perPage = 10, $isSlice = true, $total = null): array
+    {
+        $request = ApplicationContext::getContainer()->get(RequestInterface::class);
+
+        $current_page = $request->input('page', 1);
+        $current_page = $current_page <= 0 ? 1 : $current_page;
+
+        if ($isSlice) {
+            $item = array_slice($list, ($current_page - 1) * $perPage, $perPage);//$Array为要分页的数组
+        } else {
+            $item = $list;
+        }
+
+        $totals = $total;
+        if (is_null($total)) {
+            $totals = count($list);
+        }
+
+        $paginator = new LengthAwarePaginator($item, $totals, $perPage, $current_page, [
+            'path' => Paginator::resolveCurrentPath(),
+            'pageName' => 'page',
+        ]);
+        return $this->formatPaginator($paginator);
+    }
+
+        public function validator($rules, $message = []): ?string
     {
         $validator = $this->validationFactory
             ->make($this->request->all(), $rules, $message);

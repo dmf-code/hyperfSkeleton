@@ -55,9 +55,23 @@ if (!function_exists("response")) {
     }
 }
 
+if (!function_exists("redis")) {
+    function redis()
+    {
+        return ApplicationContext::getContainer()->get(\Hyperf\Redis\Redis::class);
+    }
+}
+
 if (!function_exists("log_standard_error")) {
     function log_standard_error(\Exception $e) {
         $str = sprintf("File: %s, Line %s, %s", $e->getFile(), $e->getLine(), $e->getMessage());
         \App\Log::error($str);
+    }
+}
+
+if (!function_exists("file_path")) {
+    function file_path($path='') {
+        $path = BASE_PATH . '/storage/files/' . $path;
+        return $path;
     }
 }

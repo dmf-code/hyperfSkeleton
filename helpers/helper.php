@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 
 use Hyperf\Guzzle\ClientFactory;
+use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\ApplicationContext;
 
 if (!function_exists("http_client")) {
@@ -73,5 +74,12 @@ if (!function_exists("file_path")) {
     function file_path($path='') {
         $path = BASE_PATH . '/storage/files/' . $path;
         return $path;
+    }
+}
+
+if (!function_exists("logger")) {
+    function logger($group='default')
+    {
+        return ApplicationContext::getContainer()->get(LoggerFactory::class)->get('log', $group);
     }
 }

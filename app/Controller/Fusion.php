@@ -14,6 +14,7 @@ use Hyperf\Utils\ApplicationContext;
 
 trait Fusion
 {
+    private $_filter = [];
 
     public function inputs($params): array
     {
@@ -33,12 +34,12 @@ trait Fusion
 
     protected function formatPaginator(LengthAwarePaginatorInterface $paginator): array
     {
-        return [
+        return resp(200, 'ok', [
             'items'=>$paginator->items(),
             'total'=>$paginator->total(),
             'current_page'=>$paginator->currentPage(),
             'per_page'=>$paginator->perPage(),
-        ];
+        ]);
     }
 
     protected function customPaginator($list,$perPage = 10, $isSlice = true, $total = null): array
@@ -80,7 +81,13 @@ trait Fusion
 
     public function equal($model, $key, $field=null)
     {
-        if (!is_null($item = $this->request->input($key, null))) {
+        $item = $this->request->input($key, null);
+
+        if (in_array($item, $this->_filter, true)) {
+            $item = null;
+        }
+
+        if (!is_null($item)) {
             if (is_null($field)) {
                 $field = $key;
             }
@@ -149,9 +156,23 @@ trait Fusion
     {
         $start = $this->request->input($start, null);
         $end = $this->request->input($end, null);
+
+        if (in_array($start, $this->_filter, true)) {
+            $start = null;
+        }
+        if (in_array($end, $this->_filter, true)) {
+            $end = null;
+        }
+
+
         if (!is_null($start) && !is_null($end)) {
             $model->where($col, '>=', $start)
                 ->where($col, '<=', $end);
         }
+    }
+
+    public function setFilter($arrays): void
+    {
+        $this->_filter = $arrays;
     }
 }

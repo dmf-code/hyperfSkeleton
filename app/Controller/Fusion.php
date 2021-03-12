@@ -18,7 +18,17 @@ trait Fusion
 
     public function inputs($params): array
     {
-        return array_combine($params, $this->request->inputs($params));
+        $fields = $this->request->inputs($params);
+
+        // 过滤掉不需要的字段
+        foreach ($fields as $k => $v) {
+
+            if (in_array($v, $this->_filter, true)) {
+                unset($fields[$k], $params[$k]);
+            }
+
+        }
+        return array_combine($params, $fields);
     }
 
     protected function success($msg="ok", $data = [], $code=200): array
